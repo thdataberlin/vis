@@ -905,8 +905,8 @@ div.vis-network div.vis-navigation div.vis-button.vis-zoomExtends {
 }
 
 .vis-item.vis-selected {
-  border-color: #FFC200;
-  background-color: #FFF785;
+  /*border-color: #FFC200;*/
+  /*background-color: #FFF785;*/
 
   /* z-index must be higher than the z-index of custom time bar and current time bar */
   z-index: 2;
@@ -917,7 +917,7 @@ div.vis-network div.vis-navigation div.vis-button.vis-zoomExtends {
 }
 
 .vis-item.vis-point.vis-selected {
-  background-color: #FFF785;
+  /*background-color: #FFF785;*/
 }
 
 .vis-item.vis-box {

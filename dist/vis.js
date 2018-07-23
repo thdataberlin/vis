@@ -4,8 +4,8 @@
  *
  * A dynamic, browser-based visualization library.
  *
- * @version 4.21.0
- * @date    2018-07-02
+ * @version 4.21.1
+ * @date    2018-07-23
  *
  * @license
  * Copyright (C) 2011-2017 Almende B.V, http://almende.com
@@ -1687,31 +1687,29 @@ exports.easingFunctions = {
 };
 
 exports.getScrollBarWidth = function () {
-  console.warn("always return 0 for testing");
-  return 0;
-  // var inner = document.createElement('p');
-  // inner.style.width = "100%";
-  // inner.style.height = "200px";
-  //
-  // var outer = document.createElement('div');
-  // outer.style.position = "absolute";
-  // outer.style.top = "0px";
-  // outer.style.left = "0px";
-  // outer.style.visibility = "hidden";
-  // outer.style.width = "200px";
-  // outer.style.height = "150px";
-  // outer.style.overflow = "hidden";
-  // outer.appendChild (inner);
-  //
-  // document.body.appendChild (outer);
-  // var w1 = inner.offsetWidth;
-  // outer.style.overflow = 'scroll';
-  // var w2 = inner.offsetWidth;
-  // if (w1 == w2) w2 = outer.clientWidth;
-  //
-  // document.body.removeChild (outer);
-  //
-  // return (w1 - w2);
+  var inner = document.createElement('p');
+  inner.style.width = "100%";
+  inner.style.height = "200px";
+
+  var outer = document.createElement('div');
+  outer.style.position = "absolute";
+  outer.style.top = "0px";
+  outer.style.left = "0px";
+  outer.style.visibility = "hidden";
+  outer.style.width = "200px";
+  outer.style.height = "150px";
+  outer.style.overflow = "hidden";
+  outer.appendChild(inner);
+
+  document.body.appendChild(outer);
+  var w1 = inner.offsetWidth;
+  outer.style.overflow = 'scroll';
+  var w2 = inner.offsetWidth;
+  if (w1 == w2) w2 = outer.clientWidth;
+
+  document.body.removeChild(outer);
+
+  return w1 - w2;
 };
 
 exports.topMost = function (pile, accessors) {
@@ -10340,7 +10338,11 @@ Core.prototype._redraw = function () {
   props.background.width = props.root.width - props.borderRootWidth;
 
   if (!this.initialDrawDone) {
-    props.scrollbarWidth = util.getScrollBarWidth();
+    if (options.compensateScrollbarWidth) {
+      props.scrollbarWidth = util.getScrollBarWidth();
+    } else {
+      props.scrollbarWidth = 0;
+    }
   }
 
   if (options.verticalScroll) {
@@ -10597,7 +10599,11 @@ Core.prototype._startAutoResize = function () {
       if (me.dom.root.offsetWidth != me.props.lastWidth || me.dom.root.offsetHeight != me.props.lastHeight) {
         me.props.lastWidth = me.dom.root.offsetWidth;
         me.props.lastHeight = me.dom.root.offsetHeight;
-        me.props.scrollbarWidth = util.getScrollBarWidth();
+        if (me.options.compensateScrollbarWidth) {
+          me.props.scrollbarWidth = util.getScrollBarWidth();
+        } else {
+          me.props.scrollbarWidth = 0;
+        }
 
         me.body.emitter.emit('_change');
       }

@@ -5,7 +5,7 @@
  * A dynamic, browser-based visualization library.
  *
  * @version 4.21.1
- * @date    2018-08-03
+ * @date    2018-08-06
  *
  * @license
  * Copyright (C) 2011-2017 Almende B.V, http://almende.com
@@ -12539,12 +12539,18 @@ Group.prototype._updateItemsInRange = function (orderedItems, oldVisibleItems, r
     }
   }
 
+  /*
   // we do a binary search for the items that have only start values.
-  var initialPosByStart = util.binarySearchCustom(orderedItems.byStart, searchFunction, 'data', 'start');
-
-  // trace the visible items from the inital start pos both ways until an invisible item is found, we only look at the start values.
+  var initialPosByStart = util.binarySearchCustom(orderedItems.byStart, searchFunction, 'data','start');
+   // trace the visible items from the inital start pos both ways until an invisible item is found, we only look at the start values.
   this._traceVisible(initialPosByStart, orderedItems.byStart, visibleItems, visibleItemsLookup, function (item) {
-    return item.data.start < lowerBound || item.data.start > upperBound;
+    return (item.data.start < lowerBound || item.data.start > upperBound);
+  });
+  */
+
+  orderedItems.byStart.forEach(function (item) {
+    visibleItemsLookup[item.id] = true;
+    visibleItems.push(item);
   });
 
   // if the window has changed programmatically without overlapping the old window, the ranged items with start < lowerBound and end > upperbound are not shown.
@@ -12555,12 +12561,18 @@ Group.prototype._updateItemsInRange = function (orderedItems, oldVisibleItems, r
       this._checkIfVisibleWithReference(orderedItems.byEnd[i], visibleItems, visibleItemsLookup, range);
     }
   } else {
+    /*
     // we do a binary search for the items that have defined end times.
-    var initialPosByEnd = util.binarySearchCustom(orderedItems.byEnd, searchFunction, 'data', 'end');
-
-    // trace the visible items from the inital start pos both ways until an invisible item is found, we only look at the end values.
+    var initialPosByEnd = util.binarySearchCustom(orderedItems.byEnd, searchFunction, 'data','end');
+     // trace the visible items from the inital start pos both ways until an invisible item is found, we only look at the end values.
     this._traceVisible(initialPosByEnd, orderedItems.byEnd, visibleItems, visibleItemsLookup, function (item) {
-      return item.data.end < lowerBound || item.data.end > upperBound;
+      return (item.data.end < lowerBound || item.data.end > upperBound);
+    });
+    */
+
+    orderedItems.byStart.forEach(function (item) {
+      visibleItemsLookup[item.id] = true;
+      visibleItems.push(item);
     });
   }
 

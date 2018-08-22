@@ -5,7 +5,7 @@
  * A dynamic, browser-based visualization library.
  *
  * @version 4.21.1
- * @date    2018-08-06
+ * @date    2018-08-22
  *
  * @license
  * Copyright (C) 2011-2017 Almende B.V, http://almende.com
@@ -5789,7 +5789,8 @@ Item.prototype.repositionY = function () {
  * @protected
  */
 Item.prototype._repaintDragCenter = function () {
-  if (this.selected && this.options.editable.updateTime && !this.dom.dragCenter) {
+  var editable = this.options.editable;
+  if (this.selected && editable.updatePosition && editable.updateTime && !this.dom.dragCenter) {
     var me = this;
     // create and show drag area
     var dragCenter = document.createElement('div');
@@ -5878,7 +5879,7 @@ Item.prototype._repaintDeleteButton = function (anchor) {
 Item.prototype._repaintOnItemUpdateTimeTooltip = function (anchor) {
   if (!this.options.tooltipOnItemUpdateTime) return;
 
-  var editable = (this.options.editable.updateTime || this.data.editable === true) && this.data.editable !== false;
+  var editable = (this.options.editable.updateTime || this.options.editable.updatePosition || this.data.editable === true) && this.data.editable !== false;
 
   if (this.selected && editable && !this.dom.onItemUpdateTimeTooltip) {
     var onItemUpdateTimeTooltip = document.createElement('div');
@@ -5911,7 +5912,7 @@ Item.prototype._repaintOnItemUpdateTimeTooltip = function (anchor) {
     var tooltipOffset = 50; // TODO: should be tooltip height (depends on template)
     var scrollTop = this.parent.itemSet.body.domProps.scrollTop;
 
-    // TODO: this.top for orientation:true is actually the items distance from the bottom... 
+    // TODO: this.top for orientation:true is actually the items distance from the bottom...
     // (should be this.bottom)
     var itemDistanceFromTop;
     if (this.options.orientation.item == 'top') {
@@ -6094,7 +6095,7 @@ Item.prototype._updateEditStatus = function () {
       };
     } else if ((0, _typeof3['default'])(this.options.editable) === 'object') {
       this.editable = {};
-      util.selectiveExtend(['updateTime', 'updateGroup', 'remove'], this.editable, this.options.editable);
+      util.selectiveExtend(['updatePosition', 'updateTime', 'updateGroup', 'remove'], this.editable, this.options.editable);
     }
   }
   // Item data overrides, except if options.editable.overrideItems is set.
@@ -6110,7 +6111,7 @@ Item.prototype._updateEditStatus = function () {
         // TODO: in vis.js 5.0, we should change this to not reset options from the timeline configuration.
         // Basically just remove the next line...
         this.editable = {};
-        util.selectiveExtend(['updateTime', 'updateGroup', 'remove'], this.editable, this.data.editable);
+        util.selectiveExtend(['updatePosition', 'updateTime', 'updateGroup', 'remove'], this.editable, this.data.editable);
       }
     }
   }
@@ -12868,7 +12869,7 @@ RangeItem.prototype._updateDirtyDomComponents = function () {
     this._updateDataAttributes(this.dom.box);
     this._updateStyle(this.dom.box);
 
-    var editable = this.editable.updateTime || this.editable.updateGroup;
+    var editable = this.editable.updatePosition || this.editable.updateTime || this.editable.updateGroup;
 
     // update class
     var className = (this.data.className ? ' ' + this.data.className : '') + (this.selected ? ' vis-selected' : '') + (editable ? ' vis-editable' : ' vis-readonly');
@@ -12904,8 +12905,10 @@ RangeItem.prototype._repaintDomAdditionals = function () {
   this._repaintOnItemUpdateTimeTooltip(this.dom.box);
   this._repaintDeleteButton(this.dom.box);
   this._repaintDragCenter();
-  this._repaintDragLeft();
-  this._repaintDragRight();
+  if (this.editable.updateTime) {
+    this._repaintDragLeft();
+    this._repaintDragRight();
+  }
 };
 
 /**
@@ -12922,7 +12925,7 @@ RangeItem.prototype.redraw = function (returnQueue) {
   // append DOM to parent DOM
   this._appendDomElement.bind(this),
 
-  // update dirty DOM 
+  // update dirty DOM
   this._updateDirtyDomComponents.bind(this), function () {
     if (this.dirty) {
       sizes = this._getDomComponentsSizes.bind(this)();
@@ -17767,7 +17770,7 @@ ItemSet.prototype._create = function () {
   this.body.dom.centerContainer.addEventListener('mouseover', this._onMouseOver.bind(this));
   this.body.dom.centerContainer.addEventListener('mouseout', this._onMouseOut.bind(this));
   this.body.dom.centerContainer.addEventListener('mousemove', this._onMouseMove.bind(this));
-  // right-click on timeline 
+  // right-click on timeline
   this.body.dom.centerContainer.addEventListener('contextmenu', this._onDragEnd.bind(this));
 
   this.body.dom.centerContainer.addEventListener('mousewheel', this._onMouseWheel.bind(this));
@@ -17893,7 +17896,7 @@ ItemSet.prototype.setOptions = function (options) {
         this.options.editable.remove = options.editable;
         this.options.editable.overrideItems = false;
       } else if ((0, _typeof3['default'])(options.editable) === 'object') {
-        util.selectiveExtend(['updateTime', 'updateGroup', 'add', 'remove', 'overrideItems'], this.options.editable, options.editable);
+        util.selectiveExtend(['updateTime', 'updatePosition', 'updateGroup', 'add', 'remove', 'overrideItems'], this.options.editable, options.editable);
       }
     }
 
@@ -18471,7 +18474,7 @@ ItemSet.prototype._onUpdate = function (ids) {
     var selected;
 
     if (item) {
-      // update item   	
+      // update item
       if (!constructor || !(item instanceof constructor)) {
         // item type has changed, delete the item and recreate it
         selected = item.selected; // preserve selection of this item
@@ -18815,13 +18818,13 @@ ItemSet.prototype._onDragStart = function (event) {
   var props;
 
   if (item && (item.selected || this.options.itemsAlwaysDraggable.item)) {
-
-    if (this.options.editable.overrideItems && !this.options.editable.updateTime && !this.options.editable.updateGroup) {
+    var editable = this.options.editable;
+    if (editable.overrideItems && !(editable.updateTime || editable.updatePosition) && !editable.updateGroup) {
       return;
     }
 
     // override options.editable
-    if (item.editable != null && !item.editable.updateTime && !item.editable.updateGroup && !this.options.editable.overrideItems) {
+    if (item.editable != null && !(item.editable.updateTime || item.editable.updatePosition) && !item.editable.updateGroup && !this.options.editable.overrideItems) {
       return;
     }
 
@@ -18996,11 +18999,12 @@ ItemSet.prototype._onDrag = function (event) {
       }
 
       var itemData = this._cloneItemData(props.item.data); // clone the data
-      if (props.item.editable != null && !props.item.editable.updateTime && !props.item.editable.updateGroup && !me.options.editable.overrideItems) {
+      if (props.item.editable != null && !props.item.editable.updatePosition && !props.item.editable.updateTime && !props.item.editable.updateGroup && !me.options.editable.overrideItems) {
         return;
       }
 
-      var updateTimeAllowed = (this.options.editable.overrideItems || selectedItem.editable == null) && this.options.editable.updateTime || !this.options.editable.overrideItems && selectedItem.editable != null && selectedItem.editable.updateTime;
+      var editable = this.options.editable;
+      var updateTimeAllowed = (editable.overrideItems || selectedItem.editable == null) && (editable.updateTime || editable.updatePosition) || !editable.overrideItems && selectedItem.editable != null && (selectedItem.editable.updateTime || editable.updatePosition);
       if (updateTimeAllowed) {
         if (props.dragLeft) {
           // drag left side of a range item
@@ -19271,7 +19275,7 @@ ItemSet.prototype._onGroupDrag = function (event) {
           else if (origOrder[curPos + orgOffset] == draggedId) {
               orgOffset = 1;
             }
-            // found a group (apart from dragged group) that has the wrong position -> switch with the 
+            // found a group (apart from dragged group) that has the wrong position -> switch with the
             // group at the position where other one should be, fix index arrays and continue
             else {
                 var slippedPosition = newOrder.indexOf(origOrder[curPos + orgOffset]);
@@ -19496,7 +19500,7 @@ ItemSet.prototype._onUpdateItem = function (item) {
 /**
  * Handle drop event of data on item
  * Only called when `objectData.target === 'item'.
- * @param {Event} event The event 
+ * @param {Event} event The event
  * @private
  */
 ItemSet.prototype._onDropObjectOnItem = function (event) {
@@ -19888,14 +19892,14 @@ exports.stack = function (items, margin, force) {
 };
 
 /**
- * Adjust vertical positions of the items within a single subgroup such that they 
+ * Adjust vertical positions of the items within a single subgroup such that they
  * don't overlap each other.
  * @param {Item[]} items
  *            All items withina subgroup
  * @param {{item: {horizontal: number, vertical: number}, axis: number}} margin
  *            Margins between items and between items and the axis.
  * @param {subgroup} subgroup
- *            The subgroup that is being stacked 
+ *            The subgroup that is being stacked
  */
 exports.substack = function (items, margin, subgroup) {
   for (var i = 0; i < items.length; i++) {
@@ -20019,7 +20023,7 @@ exports.stackSubgroups = function (items, margin, subgroups) {
  * @param {{item: {horizontal: number, vertical: number}, axis: number}} margin
  *            Margins between items and between items and the axis.
  * @param {subgroups[]} subgroups
- *            All subgroups 
+ *            All subgroups
  */
 exports.stackSubgroupsWithInnerStack = function (subgroupItems, margin, subgroups) {
   var doSubStack = false;
@@ -20093,7 +20097,7 @@ exports.collision = function (a, b, margin, rtl) {
  * @return {boolean}        true if a and b collide, else false
  */
 exports.collisionByTimes = function (a, b) {
-  return a.start <= b.start && a.end >= b.start && a.top < b.top + b.height && a.top + a.height > b.top || b.start <= a.start && b.end >= a.start && b.top < a.top + a.height && b.top + b.height > a.top;
+  return a.start <= b.start && a.end > b.start && a.top < b.top + b.height && a.top + a.height > b.top || b.start <= a.start && b.end > a.start && b.top < a.top + a.height && b.top + b.height > a.top;
 };
 
 /***/ }),
@@ -21193,6 +21197,7 @@ var allOptions = {
     add: { 'boolean': bool, 'undefined': 'undefined' },
     remove: { 'boolean': bool, 'undefined': 'undefined' },
     updateGroup: { 'boolean': bool, 'undefined': 'undefined' },
+    updatePosition: { 'boolean': bool, 'undefined': 'undefined' },
     updateTime: { 'boolean': bool, 'undefined': 'undefined' },
     overrideItems: { 'boolean': bool, 'undefined': 'undefined' },
     __type__: { 'boolean': bool, object: object }

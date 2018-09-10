@@ -5,7 +5,7 @@
  * A dynamic, browser-based visualization library.
  *
  * @version 4.21.1
- * @date    2018-08-22
+ * @date    2018-09-10
  *
  * @license
  * Copyright (C) 2011-2017 Almende B.V, http://almende.com
@@ -12513,69 +12513,16 @@ Group.prototype.order = function () {
  * @private
  */
 Group.prototype._updateItemsInRange = function (orderedItems, oldVisibleItems, range) {
-  var visibleItems = [];
-  var visibleItemsLookup = {}; // we keep this to quickly look up if an item already exists in the list without using indexOf on visibleItems
-
-  var interval = (range.end - range.start) / 4;
-  var lowerBound = range.start - interval;
-  var upperBound = range.end + interval;
-
-  // this function is used to do the binary search.
-  var searchFunction = function searchFunction(value) {
-    if (value < lowerBound) {
-      return -1;
-    } else if (value <= upperBound) {
-      return 0;
-    } else {
-      return 1;
-    }
-  };
-
-  // first check if the items that were in view previously are still in view.
-  // IMPORTANT: this handles the case for the items with startdate before the window and enddate after the window!
-  // also cleans up invisible items.
-  if (oldVisibleItems.length > 0) {
-    for (var i = 0; i < oldVisibleItems.length; i++) {
-      this._checkIfVisibleWithReference(oldVisibleItems[i], visibleItems, visibleItemsLookup, range);
-    }
-  }
 
   /*
-  // we do a binary search for the items that have only start values.
-  var initialPosByStart = util.binarySearchCustom(orderedItems.byStart, searchFunction, 'data','start');
-   // trace the visible items from the inital start pos both ways until an invisible item is found, we only look at the start values.
-  this._traceVisible(initialPosByStart, orderedItems.byStart, visibleItems, visibleItemsLookup, function (item) {
-    return (item.data.start < lowerBound || item.data.start > upperBound);
-  });
-  */
+   NOTE: This function is heavily simplified by thdata because we want the groups to always have a fixed height
+   Check the original function in case you are looking for bugs around this function
+   */
+  var visibleItems = [];
 
   orderedItems.byStart.forEach(function (item) {
-    visibleItemsLookup[item.id] = true;
     visibleItems.push(item);
   });
-
-  // if the window has changed programmatically without overlapping the old window, the ranged items with start < lowerBound and end > upperbound are not shown.
-  // We therefore have to brute force check all items in the byEnd list
-  if (this.checkRangedItems == true) {
-    this.checkRangedItems = false;
-    for (i = 0; i < orderedItems.byEnd.length; i++) {
-      this._checkIfVisibleWithReference(orderedItems.byEnd[i], visibleItems, visibleItemsLookup, range);
-    }
-  } else {
-    /*
-    // we do a binary search for the items that have defined end times.
-    var initialPosByEnd = util.binarySearchCustom(orderedItems.byEnd, searchFunction, 'data','end');
-     // trace the visible items from the inital start pos both ways until an invisible item is found, we only look at the end values.
-    this._traceVisible(initialPosByEnd, orderedItems.byEnd, visibleItems, visibleItemsLookup, function (item) {
-      return (item.data.end < lowerBound || item.data.end > upperBound);
-    });
-    */
-
-    orderedItems.byStart.forEach(function (item) {
-      visibleItemsLookup[item.id] = true;
-      visibleItems.push(item);
-    });
-  }
 
   var redrawQueue = {};
   var redrawQueueLength = 0;
@@ -20097,7 +20044,7 @@ exports.collision = function (a, b, margin, rtl) {
  * @return {boolean}        true if a and b collide, else false
  */
 exports.collisionByTimes = function (a, b) {
-  return a.start <= b.start && a.end > b.start && a.top < b.top + b.height && a.top + a.height > b.top || b.start <= a.start && b.end > a.start && b.top < a.top + a.height && b.top + b.height > a.top;
+  return a.start <= b.start && a.end >= b.start && a.top < b.top + b.height && a.top + a.height > b.top || b.start <= a.start && b.end >= a.start && b.top < a.top + a.height && b.top + b.height > a.top;
 };
 
 /***/ }),

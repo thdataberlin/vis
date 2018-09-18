@@ -5,7 +5,7 @@
  * A dynamic, browser-based visualization library.
  *
  * @version 4.21.1
- * @date    2018-09-10
+ * @date    2018-09-18
  *
  * @license
  * Copyright (C) 2011-2017 Almende B.V, http://almende.com
@@ -40603,8 +40603,8 @@ var printStyle = __webpack_require__(15).printStyle;
 var allOptions = __webpack_require__(105).allOptions;
 var configureOptions = __webpack_require__(105).configureOptions;
 
-var Configurator = __webpack_require__(71)['default'];
-var Validator = __webpack_require__(15)['default'];
+var Configurator = __webpack_require__(71)["default"];
+var Validator = __webpack_require__(15)["default"];
 
 /**
  * Create a timeline visualization
@@ -40616,9 +40616,8 @@ var Validator = __webpack_require__(15)['default'];
  * @extends Core
  */
 function Timeline(container, items, groups, options) {
-
   if (!(this instanceof Timeline)) {
-    throw new SyntaxError('Constructor must be called with the new operator');
+    throw new SyntaxError("Constructor must be called with the new operator");
   }
 
   // if the third element is options, the forth is groups (optionally);
@@ -40631,7 +40630,7 @@ function Timeline(container, items, groups, options) {
   // TODO: REMOVE THIS in the next MAJOR release
   // see https://github.com/almende/vis/issues/2511
   if (options && options.throttleRedraw) {
-    console.warn("Timeline option \"throttleRedraw\" is DEPRICATED and no longer supported. It will be removed in the next MAJOR release.");
+    console.warn('Timeline option "throttleRedraw" is DEPRICATED and no longer supported. It will be removed in the next MAJOR release.');
   }
 
   var me = this;
@@ -40640,8 +40639,8 @@ function Timeline(container, items, groups, options) {
     end: null,
     autoResize: true,
     orientation: {
-      axis: 'bottom', // axis orientation: 'bottom', 'top', or 'both'
-      item: 'bottom' // not relevant
+      axis: "bottom", // axis orientation: 'bottom', 'top', or 'both'
+      item: "bottom" // not relevant
     },
     moment: moment,
     width: null,
@@ -40654,7 +40653,7 @@ function Timeline(container, items, groups, options) {
   // Create the DOM, props, and emitter
   this._create(container);
   if (!options || options && typeof options.rtl == "undefined") {
-    this.dom.root.style.visibility = 'hidden';
+    this.dom.root.style.visibility = "hidden";
     var directionFromDom,
         domNode = this.dom.root;
     while (!directionFromDom && domNode) {
@@ -40718,42 +40717,42 @@ function Timeline(container, items, groups, options) {
   this.groupsData = null; // DataSet
 
   this.dom.root.onclick = function (event) {
-    me.emit('click', me.getEventProperties(event));
+    me.emit("click", me.getEventProperties(event));
   };
   this.dom.root.ondblclick = function (event) {
-    me.emit('doubleClick', me.getEventProperties(event));
+    me.emit("doubleClick", me.getEventProperties(event));
   };
   this.dom.root.oncontextmenu = function (event) {
-    me.emit('contextmenu', me.getEventProperties(event));
+    me.emit("contextmenu", me.getEventProperties(event));
   };
   this.dom.root.onmouseover = function (event) {
-    me.emit('mouseOver', me.getEventProperties(event));
+    me.emit("mouseOver", me.getEventProperties(event));
   };
   if (window.PointerEvent) {
     this.dom.root.onpointerdown = function (event) {
-      me.emit('mouseDown', me.getEventProperties(event));
+      me.emit("mouseDown", me.getEventProperties(event));
     };
     this.dom.root.onpointermove = function (event) {
-      me.emit('mouseMove', me.getEventProperties(event));
+      me.emit("mouseMove", me.getEventProperties(event));
     };
     this.dom.root.onpointerup = function (event) {
-      me.emit('mouseUp', me.getEventProperties(event));
+      me.emit("mouseUp", me.getEventProperties(event));
     };
   } else {
     this.dom.root.onmousemove = function (event) {
-      me.emit('mouseMove', me.getEventProperties(event));
+      me.emit("mouseMove", me.getEventProperties(event));
     };
     this.dom.root.onmousedown = function (event) {
-      me.emit('mouseDown', me.getEventProperties(event));
+      me.emit("mouseDown", me.getEventProperties(event));
     };
     this.dom.root.onmouseup = function (event) {
-      me.emit('mouseUp', me.getEventProperties(event));
+      me.emit("mouseUp", me.getEventProperties(event));
     };
   }
 
   //Single time autoscale/fit
   this.initialFitDone = false;
-  this.on('changed', function () {
+  this.on("changed", function () {
     if (this.itemsData == null || this.options.rollingMode) return;
     if (!me.initialFitDone) {
       me.initialFitDone = true;
@@ -40772,7 +40771,7 @@ function Timeline(container, items, groups, options) {
 
     if (!me.initialDrawDone && me.initialRangeChangeDone) {
       me.initialDrawDone = true;
-      me.dom.root.style.visibility = 'visible';
+      me.dom.root.style.visibility = "visible";
       if (me.options.onInitialDrawComplete) {
         setTimeout(function () {
           return me.options.onInitialDrawComplete();
@@ -40829,11 +40828,11 @@ Timeline.prototype.setOptions = function (options) {
   var errorFound = Validator.validate(options, allOptions);
 
   if (errorFound === true) {
-    console.log('%cErrors have been found in the supplied options object.', printStyle);
+    console.log("%cErrors have been found in the supplied options object.", printStyle);
   }
   Core.prototype.setOptions.call(this, options);
 
-  if ('type' in options) {
+  if ("type" in options) {
     if (options.type !== this.options.type) {
       this.options.type = options.type;
 
@@ -40864,8 +40863,8 @@ Timeline.prototype.setItems = function (items) {
     // turn an array into a dataset
     newDataSet = new DataSet(items, {
       type: {
-        start: 'Date',
-        end: 'Date'
+        start: "Date",
+        end: "Date"
       }
     });
   }
@@ -40967,8 +40966,8 @@ Timeline.prototype.focus = function (id, options) {
   // get the specified item(s)
   var itemsData = this.itemsData.getDataSet().get(ids, {
     type: {
-      start: 'Date',
-      end: 'Date'
+      start: "Date",
+      end: "Date"
     }
   });
 
@@ -40977,7 +40976,7 @@ Timeline.prototype.focus = function (id, options) {
   var end = null;
   itemsData.forEach(function (itemData) {
     var s = itemData.start.valueOf();
-    var e = 'end' in itemData ? itemData.end.valueOf() : itemData.start.valueOf();
+    var e = "end" in itemData ? itemData.end.valueOf() : itemData.start.valueOf();
 
     if (start === null || s < start) {
       start = s;
@@ -41050,7 +41049,11 @@ Timeline.prototype.focus = function (id, options) {
 
     if (!animation) {
       // We aren't animating so set a default so that the final callback forces the vertical location
-      initialVerticalScroll = { shouldScroll: false, scrollOffset: -1, itemTop: -1 };
+      initialVerticalScroll = {
+        shouldScroll: false,
+        scrollOffset: -1,
+        itemTop: -1
+      };
     }
 
     this.range.setRange(middle - interval / 2, middle + interval / 2, { animation: animation }, finalVerticalCallback, verticalAnimationFrame);
@@ -41090,7 +41093,7 @@ Timeline.prototype.fit = function (options, callback) {
  * @returns {number}
  */
 function getStart(item) {
-  return util.convert(item.data.start, 'Date').valueOf();
+  return util.convert(item.data.start, "Date").valueOf();
 }
 
 /**
@@ -41100,7 +41103,7 @@ function getStart(item) {
  */
 function getEnd(item) {
   var end = item.data.end != undefined ? item.data.end : item.data.start;
-  return util.convert(end, 'Date').valueOf();
+  return util.convert(end, "Date").valueOf();
 }
 
 /**
@@ -41126,7 +41129,7 @@ function getItemVerticalScroll(timeline, item) {
   };
 
   var currentScrollHeight = timeline._getScrollTop() * -1;
-  var targetOffset = offset + itemTop();
+  var targetOffset = offset + itemTop() + itemsetHeight / 2;
   var height = item.height;
 
   if (targetOffset < currentScrollHeight) {
@@ -41134,14 +41137,18 @@ function getItemVerticalScroll(timeline, item) {
       offset += itemTop() - timeline.itemSet.options.margin.item.vertical;
     }
   } else if (targetOffset + height > currentScrollHeight + itemsetHeight) {
-    offset += itemTop() + height - itemsetHeight + timeline.itemSet.options.margin.item.vertical;
+    offset += itemTop() + height - itemsetHeight / 2 + timeline.itemSet.options.margin.item.vertical;
   } else {
     shouldScroll = false;
   }
 
   offset = Math.min(offset, contentHeight - itemsetHeight);
 
-  return { shouldScroll: shouldScroll, scrollOffset: offset, itemTop: targetOffset };
+  return {
+    shouldScroll: shouldScroll,
+    scrollOffset: offset,
+    itemTop: targetOffset
+  };
 }
 
 /**
@@ -41246,8 +41253,8 @@ Timeline.prototype.getDataRange = function () {
   var dataset = this.itemsData && this.itemsData.getDataSet();
   if (dataset) {
     dataset.forEach(function (item) {
-      var start = util.convert(item.start, 'Date').valueOf();
-      var end = util.convert(item.end != undefined ? item.end : item.start, 'Date').valueOf();
+      var start = util.convert(item.start, "Date").valueOf();
+      var end = util.convert(item.end != undefined ? item.end : item.start, "Date").valueOf();
       if (min === null || start < min) {
         min = start;
       }
@@ -41293,19 +41300,19 @@ Timeline.prototype.getEventProperties = function (event) {
   var element = util.getTarget(event);
   var what = null;
   if (item != null) {
-    what = 'item';
+    what = "item";
   } else if (customTime != null) {
-    what = 'custom-time';
+    what = "custom-time";
   } else if (util.hasParent(element, this.timeAxis.dom.foreground)) {
-    what = 'axis';
+    what = "axis";
   } else if (this.timeAxis2 && util.hasParent(element, this.timeAxis2.dom.foreground)) {
-    what = 'axis';
+    what = "axis";
   } else if (util.hasParent(element, this.itemSet.dom.labelSet)) {
-    what = 'group-label';
+    what = "group-label";
   } else if (util.hasParent(element, this.currentTime.bar)) {
-    what = 'current-time';
+    what = "current-time";
   } else if (util.hasParent(element, this.dom.center)) {
-    what = 'background';
+    what = "background";
   }
 
   return {
